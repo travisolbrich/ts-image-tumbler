@@ -6,12 +6,26 @@ var sharp = require('sharp');
 const app = express()
 
 const imageDir = path.resolve(__dirname, './images/')
+var i = 0;
 
 app.get('/', function(req, res, next) {
-  const files = fs.readdirSync('./images/').filter(img=>img !== "@eaDir");
-  const rand = files[Math.floor(Math.random() * files.length)];  
-  res.sendFile('/mnt/boron/teamspeak-images/images/' + rand);
+  const files = fs.readdirSync('./images/').filter(img=>img.endsWith('.png'))
+  if(i < files.length - 1) {
+    i++;
+  } else {
+    i = 0;
+  } 
+
+  const chosenImage = files[i];
+  console.log("(" + (i+1) + " of " + files.length + ") " + chosenImage);  
+  var image = fs.readFileSync('./images/' + chosenImage);
+sharp(image)
+.resize(400, 400)
+.max()
+.toBuffer()
+.then(data => res.end(data, 'image/png'))
+.catch(err => console.err('someone broke something' + err));
 });
 
 
-app.listen(3000, () => console.log('Listening on 3000)'))
+app.listen(8080, () => console.log('Listening on 8080'))
